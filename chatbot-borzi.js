@@ -6,7 +6,7 @@ const fs = require('fs');
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
 
@@ -14,18 +14,13 @@ client.on('qr', (qr) => {
     console.clear();
     console.log('\n📲 Escaneie o QR Code abaixo para autenticar no WhatsApp:\n');
 
-    // Gera QR code no terminal
+    // ✅ Gera o QR Code bonitinho no terminal
     qrcode.generate(qr, { small: true });
 
-    // Gera imagem (caso queira usar em UI futura)
-    qrcodeLink.toFile('qrcode.png', qr, () => {
-        console.log('✅ QR Code salvo como imagem: qrcode.png');
-    });
-
-    // Gera link direto para abrir no WhatsApp Web
-    const link = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`;
+    // ✅ Gera link direto clicável
+    const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`;
     console.log('\n🔗 Link alternativo para escanear com WhatsApp Web:');
-    console.log(link);
+    console.log(url);
 });
 
 client.on('ready', () => {
@@ -44,7 +39,7 @@ client.on('message', async (msg) => {
 3️⃣ *Agendar consulta*
 4️⃣ *Falar com atendente*
 ❌ *Sair*
-    
+
 Envie o número da opção que deseja.
         `;
         await msg.reply(menu);
