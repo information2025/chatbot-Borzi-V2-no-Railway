@@ -1,86 +1,60 @@
-const fs = require('fs');
-const qrcode = require('qrcode');
 const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 
+// Inicializa o client com ajustes para ambientes como Railway
 const client = new Client({
-  authStrategy: new LocalAuth({ clientId: 'borzi-v2' }),
-  puppeteer: {
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  }
-});
-
-client.on('qr', qr => {
-  qrcode.toFile('./qrcode.png', qr, {
-    color: {
-      dark: '#000',
-      light: '#FFF',
-    },
-  }, function (err) {
-    if (err) {
-      console.error('❌ Erro ao gerar QR Code:', err);
-    } else {
-      console.log('✅ QR Code gerado como imagem: qrcode.png');
-      console.log('📱 Abra esse arquivo para escanear com o WhatsApp!');
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
-  });
 });
 
+// Exibe o QR code no terminal (log do Railway)
+client.on('qr', qr => {
+    console.log('🔄 Gerando QR Code no terminal...');
+    qrcode.generate(qr, { small: true });
+});
+
+// Confirma conexão
 client.on('ready', () => {
-  console.log('✅ Tudo certo! WhatsApp conectado.');
+    console.log('✅ Cliente conectado com sucesso!');
+});
+
+// Define respostas
+client.on('message', async msg => {
+    const texto = msg.body.toLowerCase();
+
+    if (texto === 'menu') {
+        await msg.reply(
+            '📋 *Menu BorziBot*\n' +
+            '1️⃣ - Informações sobre nossos serviços\n' +
+            '2️⃣ - Falar com atendente\n' +
+            '3️⃣ - Horário de funcionamento\n' +
+            '4️⃣ - Encerrar atendimento\n\n' +
+            'Digite o número da opção desejada.'
+        );
+    }
+
+    if (texto === '1') {
+        await msg.reply('📌 Oferecemos soluções de automação para WhatsApp com IA e atendimento 24/7!');
+    }
+
+    if (texto === '2') {
+        await msg.reply('👨‍💼 Um atendente será acionado em breve. Por favor, aguarde...');
+    }
+
+    if (texto === '3') {
+        await msg.reply('🕒 Nosso horário de atendimento é de segunda a sexta, das 9h às 18h.');
+    }
+
+    if (texto === '4') {
+        await msg.reply('👋 Atendimento encerrado. Obrigado pelo contato!');
+    }
+
+    if (texto === 'oi' || texto === 'olá' || texto === 'bom dia') {
+        await msg.reply('Olá! 👋 Eu sou o *BorziBot*.\nDigite *menu* para ver as opções.');
+    }
 });
 
 client.initialize();
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
-client.on('message', async msg => {
-  if (msg.body.match(/(menu|Menu|dia|tarde|noite|oi|Oi|Olá|olá|ola|Ola)/i) && msg.from.endsWith('@c.us')) {
-    const chat = await msg.getChat();
-    const contact = await msg.getContact();
-    const name = contact.pushname;
-
-    await delay(2000);
-    await chat.sendStateTyping();
-    await delay(2000);
-
-    await client.sendMessage(msg.from,
-      `Olá, ${name.split(" ")[0]}! 🙌\n\nSou a assistente virtual do *Mentor de Alta Performance, André Borzi*! Digite uma opção para continuar:\n\n` +
-      `1 - Conheça o Mentor André Borzi\n` +
-      `2 - Agendar uma sessão on-line com André Borzi\n` +
-      `3 - Realizar a Análise de Perfil Comportamental\n` +
-      `4 - Baixar e-books para auto-desenvolvimento\n` +
-      `5 - Cancelar uma sessão agendada`
-    );
-  }
-
-  if (msg.body === '1') {
-    await client.sendMessage(msg.from,
-      '👨‍🏫 *Quem é André Borzi:*\n\nCasado com Aline e pai da Beatriz, fundou a CoHE Institute nos EUA após especialização em Coaching e Gestão. Atua desde 2005 em liderança e é apaixonado por transformar vidas com fé, planejamento e dedicação.'
-    );
-  }
-
-  if (msg.body === '2') {
-    await client.sendMessage(msg.from,
-      '📅 *Agende sua sessão:*\n\nClique no link para marcar:\nhttps://calendly.com/andreborzi/30min'
-    );
-  }
-
-  if (msg.body === '3') {
-    await client.sendMessage(msg.from,
-      '🧠 *Análise de Perfil Comportamental:*\n\nClique no link para preencher o formulário:\nForm.google.com'
-    );
-  }
-
-  if (msg.body === '4') {
-    await client.sendMessage(msg.from,
-      '📚 *E-books de Auto-Desenvolvimento:*\n\nEscolha o material que te ajudará:\nKwifi.com'
-    );
-  }
-
-  if (msg.body === '5') {
-    await client.sendMessage(msg.from,
-      '❌ *Cancelar Sessão:*\n\nAcesse o e-mail cadastrado no agendamento e clique em *Cancelar Agendamento*.'
-    );
-  }
-});
