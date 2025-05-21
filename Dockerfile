@@ -1,7 +1,9 @@
+# Imagem base com Node.js
 FROM node:18
 
-# Instala dependências do sistema necessárias pro Chromium funcionar
+# Instala dependências do Chromium para puppeteer funcionar
 RUN apt-get update && apt-get install -y \
+    chromium \
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -13,21 +15,17 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     libxshmfence1 \
     libglu1 \
-    chromium \
     --no-install-recommends && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Define diretório da aplicação
+# Cria diretório do app
 WORKDIR /app
 
-# Copia arquivos
+# Copia arquivos do projeto
 COPY . .
 
-# Instala dependências
+# Instala dependências do Node.js
 RUN npm install
 
-# Define variáveis do Chromium para o puppeteer-core
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# Comando de inicialização
+# Define comando de inicialização
 CMD ["npm", "start"]
