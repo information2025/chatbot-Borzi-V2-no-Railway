@@ -1,17 +1,33 @@
-# Usamos uma imagem base com Node.js e Chromium já pronto para Puppeteer
-FROM ghcr.io/puppeteer/puppeteer:latest
+FROM node:18
 
-# Define o diretório de trabalho
+# Instala dependências do sistema necessárias pro Chromium funcionar
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libgbm1 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libxss1 \
+    libgtk-3-0 \
+    libxshmfence1 \
+    libglu1 \
+    chromium \
+    --no-install-recommends && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Define diretório da aplicação
 WORKDIR /app
 
-# Copia os arquivos do seu projeto para o container
+# Copia arquivos
 COPY . .
 
-# Instala as dependências do Node.js
+# Instala dependências
 RUN npm install
 
-# Porta padrão (caso você use algum servidor — opcional)
-EXPOSE 3000
+# Define variáveis do Chromium para o puppeteer-core
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Comando para iniciar o bot
+# Comando de inicialização
 CMD ["npm", "start"]
