@@ -1,31 +1,14 @@
-# Imagem base com Node.js
-FROM node:18
+# Imagem oficial do Puppeteer com Node e Chromium configurados
+FROM ghcr.io/puppeteer/puppeteer:latest
 
-# Instala dependências do Chromium para puppeteer funcionar
-RUN apt-get update && apt-get install -y \
-    chromium \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libgbm1 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libxss1 \
-    libgtk-3-0 \
-    libxshmfence1 \
-    libglu1 \
-    --no-install-recommends && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Cria diretório do app
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Copia arquivos do projeto
+# Copia tudo para dentro da imagem
 COPY . .
 
-# Instala dependências do Node.js
+# Instala dependências do Node.js do projeto
 RUN npm install
 
-# Define comando de inicialização
+# Roda o chatbot
 CMD ["npm", "start"]
