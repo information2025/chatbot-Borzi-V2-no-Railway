@@ -1,33 +1,28 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const qrcodeLink = require('qrcode');
-const fs = require('fs');
+const { Client } = require('whatsapp-web.js');
 
 const client = new Client({
-    authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
     }
 });
 
-client.on('qr', (qr) => {
-    console.clear();
-    console.log('\n📲 Escaneie o QR Code abaixo para autenticar no WhatsApp:\n');
-
-    // ✅ Gera o QR Code bonitinho no terminal
+client.on('qr', qr => {
+    console.log('📲 Escaneie o QR Code abaixo para autenticar no WhatsApp:\n');
     qrcode.generate(qr, { small: true });
 
-    // ✅ Gera link direto clicável
     const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`;
     console.log('\n🔗 Link alternativo para escanear com WhatsApp Web:');
     console.log(url);
 });
 
 client.on('ready', () => {
-    console.log('\n✅ Cliente WhatsApp conectado com sucesso!\n');
+    console.log('\n✅ WhatsApp conectado com sucesso!');
 });
 
-client.on('message', async (msg) => {
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+client.on('message', async msg => {
     const comando = msg.body.toLowerCase();
 
     if (comando === 'menu') {
@@ -40,8 +35,7 @@ client.on('message', async (msg) => {
 4️⃣ *Falar com atendente*
 ❌ *Sair*
 
-Envie o número da opção que deseja.
-        `;
+Envie o número da opção que deseja.`;
         await msg.reply(menu);
     }
 
@@ -61,7 +55,7 @@ Envie o número da opção que deseja.
         await msg.reply('👩‍💼 Encaminhando para um atendente. Aguarde um momento...');
     }
 
-    if (comando === 'sair' || comando === '5' || comando === '❌') {
+    if (comando === '5' || comando === '❌' || comando === 'sair') {
         await msg.reply('👋 Obrigado por usar o Chatbot Borzi. Até logo!');
     }
 });
